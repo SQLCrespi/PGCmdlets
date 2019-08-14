@@ -1,0 +1,48 @@
+#params
+$servidor = "172.17.136.4"
+$porta = '5432'
+$usuario = 'postgres'
+$senha = 'SuperSenha'
+$banco = 'dvdrental'
+$ConnStr= "Driver={PostgreSQL UNICODE(x64)};Server=$servidor;Port=$porta;Database=$banco;Uid=$usuario;Pwd=$senha;"
+
+function Try-PgConnection {
+   param (
+      [string]$ConnStr
+   )
+   $Conn = New-Object System.Data.Odbc.OdbcConnection;
+   $Conn.ConnectionString = $ConnStr;
+   try {
+      $Conn.Open();
+      $Conn.Close();
+   }
+   catch {
+      Write-Error -Message 'Não foi possível conectar'
+   }
+
+}
+
+function Get-DadosPG{
+    param([string]$query=$(throw 'SQL Obrigatorio!'))
+    $conn = New-Object System.Data.Odbc.OdbcConnection
+    $conn.ConnectionString =$ConnStr
+    $cmd = New-object System.Data.Odbc.OdbcCommand($query,$conn)
+    $ds = New-Object system.Data.DataSet
+    (New-Object system.Data.odbc.odbcDataAdapter($cmd)).fill($ds) | out-null
+    $conn.close()
+    $ds.Tables[0]
+ }
+ 
+ 
+  function Exec-sqlPG{
+    param([string]$query=$(throw 'SQL Obrigatorio'))
+   $conn = New-Object System.Data.Odbc.OdbcConnection
+   $conn.ConnectionString= $ConnStr
+   $cmd = new-object System.Data.Odbc.OdbcCommand($query,$conn)
+   $conn.open()
+   $cmd.ExecuteNonQuery()
+   $conn.close()
+ }
+ 
+ 
+ 
